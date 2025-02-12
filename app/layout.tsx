@@ -5,6 +5,8 @@ import React from 'react';
 import { ThemeProvider } from "./provider";
 import Script from "next/script";
 
+import { NFTProvider }  from '../context/NFTContext';
+
 import { Navbar, Footer } from "../components";
 
 const inter = Inter({
@@ -25,18 +27,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
-        <ThemeProvider
-        attribute="class">
-          <div className="dark:bg-nft-dark bg-white min-h-screen">
-            <Navbar />
-            <div className="pt-65">
-            `{children}
+        <NFTProvider>
+          <ThemeProvider
+          attribute="class">
+            <div className="dark:bg-nft-dark bg-white min-h-screen">
+              <Navbar />
+              <div className="pt-65">
+                {children}
+              </div>
+              <Footer />
             </div>
-            <Footer />
-          </div>
 
-          <Script src="https://kit.fontawesome.com/292fb07a1f.js" crossOrigin="anonymous" />
-        </ThemeProvider>
+            <Script src="https://kit.fontawesome.com/292fb07a1f.js" crossOrigin="anonymous" />
+          </ThemeProvider>
+        </NFTProvider>
       </body>
     </html>
   );
