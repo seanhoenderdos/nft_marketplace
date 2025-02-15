@@ -4,15 +4,18 @@ import React, { useState, useEffect } from 'react';
 import Web3Modal from 'web3modal';
 import { ethers } from 'ethers';
 import axios from 'axios';
+import dotenv from 'dotenv';
 
 import { MarketAddress, MarketAddressAbi } from './constants';
 
 const fetchContract = (signerOrProvider) => new ethers.Contract(MarketAddress, MarketAddressAbi, signerOrProvider);
 
+dotenv.config();
 export const NFTContext = React.createContext();
 
 export const NFTProvider = ({ children }) => {
     const [currentAccount, setCurrentAccount] = useState("");
+    const [isLoadingNFT, setIsLoadingNFT] = useState(false);
     const nftCurrency = 'ETH';
 
     // Pinata API credentials
@@ -133,11 +136,15 @@ export const NFTProvider = ({ children }) => {
         ? await contract.createToken(url, price, { value: listingPrice.toString() })
         : await contract.resellToken(id, price, { value: listingPrice.toString() });
 
+        setIsLoadingNFT(true);
         await transaction.wait();
     };
 
     const fetchNFTs = async () => {
-        const provider = new ethers.providers.JsonRpcProvider();
+        setIsLoadingNFT(false);
+        const provider = new ethers.providers.JsonRpcProvider(
+            `https://eth-sepolia.g.alchemy.com/v2/${process.env.NEXT_PUBLIC_ALCHEMY_API_KEY}`
+          );
         const contract = fetchContract(provider);
 
         const data = await contract.fetchMarketItems();
@@ -163,6 +170,7 @@ export const NFTProvider = ({ children }) => {
     };
 
     const fetchMyNFTsOrListedNFTs = async (type) => {
+        setIsLoadingNFT(false);
         const web3Modal = new Web3Modal();
         const connection = await web3Modal.connect();
         const provider = new ethers.providers.Web3Provider(connection);
@@ -205,11 +213,13 @@ export const NFTProvider = ({ children }) => {
         
         const transaction = await contract.createMarketSale(nft.tokenId, { value: price });
 
+        setIsLoadingNFT(true);
         await transaction.wait();
+        setIsLoadingNFT(false);
     }
 
     return (
-        <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, createNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale }}>
+        <NFTContext.Provider value={{ nftCurrency, connectWallet, currentAccount, uploadToIPFS, createNFT, fetchNFTs, fetchMyNFTsOrListedNFTs, buyNft, createSale, isLoadingNFT }}>
             {children}
         </NFTContext.Provider>
     );

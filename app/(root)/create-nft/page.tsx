@@ -8,14 +8,14 @@ import { useTheme } from 'next-themes';
 
 import { NFTContext } from '@/context/NFTContext';
 
-import { Button, Input } from '@/components';
+import { Button, Input, Loader } from '@/components';
 import images from '@/assets';
 
 const CreateNft = () => {
   const { theme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [fileUrl, setFileUrl] = useState(null);
-  const { uploadToIPFS, createNFT } = useContext(NFTContext);
+  const { uploadToIPFS, createNFT, isLoadingNFT } = useContext(NFTContext);
   const router = useRouter();
 
   const [formInput, setFormInput] = useState({ price: '', name: '', description: '' });
@@ -55,6 +55,14 @@ const CreateNft = () => {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  if (isLoadingNFT) {
+    return (
+      <div className='flexStart min-h-screen'>
+        <Loader />
+      </div>
+    );
+  }
 
   return (
     <div className='flex justify-center sm:px-4 p-12'>
